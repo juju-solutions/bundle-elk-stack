@@ -1,0 +1,19 @@
+series: trusty
+services:
+  elasticsearch:
+    charm: "cs:~lazypower/development/trusty/elasticsearch"
+    num_units: 1
+    options:
+      "apt-repository": "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main"
+      "firewall_enabled": false
+    annotations:
+      "gui-x": "943.5"
+      "gui-y": "645.5"
+  logstash:
+    charm: "local:trusty/logstash"
+    num_units: 1
+  openjdk:
+    charm: "cs:~kwmonroe/trusty/openjdk"
+relations:
+  - - "openjdk:java"
+    - "logstash:java"
