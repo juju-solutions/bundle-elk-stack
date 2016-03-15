@@ -1,16 +1,27 @@
-# Logstash Core - subject to renaming
+# ELK Stack
 
-The Elastic Stack — that's Elasticsearch, Logstash, Kibana, and Beats — are open
+The Elastic Stack — that's Elasticsearch, Logstash, Kibana — are open
 source projects that help you take data from any source, any format and search,
 analyze, and visualize it in real time.
 
 ## The Elastic Stack
 
-**Elasticsearch** is a distributed, open source search and analytics engine, designed for horizontal scalability, reliability, and easy management. It combines the speed of search with the power of analytics via a sophisticated, developer-friendly query language covering structured, unstructured, and time-series data.
+**Elasticsearch** is a distributed, open source search and analytics engine,
+designed for horizontal scalability, reliability, and easy management. It
+combines the speed of search with the power of analytics via a sophisticated,
+developer-friendly query language covering structured, unstructured, and
+time-series data.
 
-**Logstash** is a flexible, open source data collection, enrichment, and transportation pipeline. With connectors to common infrastructure for easy integration, Logstash is designed to efficiently process a growing list of log, event, and unstructured data sources for distribution into a variety of outputs, including Elasticsearch.
+**Logstash** is a flexible, open source data collection, enrichment, and
+transportation pipeline. With connectors to common infrastructure for easy
+integration, Logstash is designed to efficiently process a growing list of log,
+event, and unstructured data sources for distribution into a variety of outputs,
+including Elasticsearch.
 
-**Kibana** is an open source data visualization platform that allows you to interact with your data through stunning, powerful graphics. From histograms to geomaps, Kibana brings your data to life with visuals that can be combined into custom dashboards that help you share insights from your data far and wide.
+**Kibana** is an open source data visualization platform that allows you to
+interact with your data through stunning, powerful graphics. From histograms to
+geomaps, Kibana brings your data to life with visuals that can be combined into
+custom dashboards that help you share insights from your data far and wide.
 
 
 This bundle is a 4 node cluster designed to scale out.
@@ -22,15 +33,16 @@ Built around Elastic components, it contains:
 
 ## Usage
 
-    juju deploy ~containers/bundle/logstash-core
+    juju deploy ~containers/bundle/elk-stack
 
 ## Testing the deployment
 
 The services provide extended status reporting to indicate when they are ready:
 
-    uju status --format=tabular
+    juju status --format=tabular
 
-This is particularly useful when combined with watch to track the on-going progress of the deployment:
+This is particularly useful when combined with watch to track the on-going
+progress of the deployment:
 
     watch -n 0.5 juju status --format=tabular
 
