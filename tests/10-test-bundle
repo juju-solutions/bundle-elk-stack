@@ -1,0 +1,84 @@
+#!/usr/bin/python3
+
+import amulet
+import unittest
+import os
+import requests
+import time
+import yaml
+
+
+class TestDeployment(unittest.TestCase):
+    bundle_file = os.path.join(os.path.dirname(__file__), '..', 'bundle.yaml')
+
+    @classmethod
+    def setUpClass(cls):
+        cls.d = amulet.Deployment(series='trusty')
+        with open(cls.bundle_file) as f:
+            bun = f.read()
+        bundle = yaml.safe_load(bun)
+        cls.d.load(bundle)
+        cls.d.setup(timeout=900)
+        cls.d.sentry.wait()
+        cls.elasticsearch = cls.d.sentry['elasticsearch'][0]
+        cls.logstash = cls.d.sentry['logstash'][0]
+        cls.kibana = cls.d.sentry['kibana'][0]
+
+    def test_logstash_self_configtest(self):
+        """ Logstash ships with a configuration utility. If we ever deviate
+        from what they identify as a well-formed config, raise an error."""
+        # SLOW TEST :(
+        out = self.logstash.run('service logstash configtest')
+        self.assertTrue('Configuration OK' in out)
+
+    def test_elasticsearch_cluster_health(self):
+        """ Elasticsearch will have a yellow cluster health when running as
+        a single node. Green if >1. However if it's red, we've failed"""
+
+        out, code = self.elasticsearch.run('curl localhost:9200/_cluster/health')  # noqa
+        self.assertTrue('"status":"green"' in out)
+        self.assertFalse('"status":"red"' in out)
+
+    def test_logstash_pipeline(self):
+        """ Configure logstash for a noisy file, and test the pipeline """
+
+        # This beastly method is likely to go away when filebeat is charmed
+
+        # Before we do anything, validate there is no logstash data in the ES
+        # cluster. If the cluster is dirty, all bets are off.
+        list_indexes = "curl localhost:9200/_cat/indices"
+        out, code = self.elasticsearch.run(list_indexes)
+        self.assertTrue('logstash' not in out)
+
+        # Generate some noise!
+        noise = "for i in {0..2000}; do echo $i >> /tmp/noisytest; done"
+        self.logstash.run(noise)
+
+        template_input = '''
+input {
+    file {
+        path => "/tmp/noisytest"
+        start_position => "beginning"
+    }
+}
+        '''
+        render_template = "echo '{0}' > /etc/logstash/conf.d/input-amulet.conf".format(template_input)  # noqa
+        self.logstash.run(render_template)
+        self.logstash.run('service logstash restart')
+
+        # This can take a bit due to the potential latency of the shipping
+        # pipeline, wait up to one minute before validation
+        time.sleep(60)
+
+        # We've now sent data to elasticsearch, validate its in the index
+        out, code = self.elasticsearch.run(list_indexes)
+        self.assertTrue('logstash' in out)
+
+    def test_kibana_web_reachable(self):
+        """ Check that the request is 200 ok and it says 'kibana'.  """
+        kibana_url = 'http://{public-address}/app/kibana'.format(**self.kibana.info)  # noqa
+        homepage = requests.get(kibana_url)
+        self.assertTrue('kibana' in homepage.text)
+
+if __name__ == '__main__':
+    unittest.main()
