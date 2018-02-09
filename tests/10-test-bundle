@@ -13,7 +13,7 @@ class TestDeployment(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.d = amulet.Deployment(series='trusty')
+        cls.d = amulet.Deployment(series='xenial')
         with open(cls.bundle_file) as f:
             bun = f.read()
         bundle = yaml.safe_load(bun)
@@ -79,6 +79,7 @@ input {
         kibana_url = 'http://{public-address}/app/kibana'.format(**self.kibana.info)  # noqa
         homepage = requests.get(kibana_url)
         self.assertTrue('kibana' in homepage.text)
+
 
 if __name__ == '__main__':
     unittest.main()
