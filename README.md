@@ -24,9 +24,9 @@ custom dashboards that help you share insights from your data far and wide.
 This bundle is a 4 node cluster designed to scale out. Built around Elastic
 components, it contains:
 
-- 1 Logstash unit (minimum mem=2GB)
-- 2 Elasticsearch units
-- 1 Kibana unit
+- 1 Logstash unit (minimum mem=3GB)
+- 2 Elasticsearch units (minimum mem=7GB)
+- 1 Kibana unit (minimum mem=3GB)
 
 ## Usage
 
